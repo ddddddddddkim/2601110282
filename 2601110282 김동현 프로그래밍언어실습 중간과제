@@ -1,0 +1,237 @@
+import java.util.ArrayList;
+import java.util.Scanner;
+
+// 도서 정보를 담는 클래스
+class Book {
+    private String title;       // 책 제목
+    private String author;      // 저자
+    private int year;           // 출판 연도
+    private boolean isBorrowed; // 대여 여부
+
+    public Book(String title, String author, int year) {
+        this.title = title;
+        this.author = author;
+        this.year = year;
+        this.isBorrowed = false; // 처음 등록 시에는 대여 안 된 상태
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public int getYear() {
+        return year;
+    }
+
+    public boolean getIsBorrowed() {
+        return isBorrowed;
+    }
+
+    public void setIsBorrowed(boolean isBorrowed) {
+        this.isBorrowed = isBorrowed;
+    }
+
+    // 책 정보를 보기 좋게 출력
+    public void printInfo() {
+        String state;
+        if (isBorrowed) {
+            state = "대여중";
+        } else {
+            state = "보관중";
+        }
+        System.out.println("제목: " + title + " | 저자: " + author
+                + " | 출판년도: " + year + " | 상태: " + state);
+    }
+}
+
+public class BookManager {
+
+    // 책 목록을 저장할 ArrayList
+    static ArrayList<Book> bookList = new ArrayList<Book>();
+    static Scanner sc = new Scanner(System.in);
+
+    public static void main(String[] args) {
+
+        // 처음에 예시 책 몇 권 넣어두기
+        bookList.add(new Book("자바의 정석", "남궁성", 2019));
+        bookList.add(new Book("이것이 자바다", "신용권", 2022));
+        bookList.add(new Book("객체지향의 사실과 오해", "조영호", 2015));
+
+        System.out.println("=================================");
+        System.out.println("  나의 도서 관리 프로그램 v1.0  ");
+        System.out.println("=================================");
+
+        boolean run = true;
+
+        while (run) {
+            printMenu();
+            int choice = 0;
+
+            try {
+                choice = Integer.parseInt(sc.nextLine());
+            } catch (Exception e) {
+                System.out.println(">> 숫자만 입력해주세요!\n");
+                continue;
+            }
+
+            switch (choice) {
+                case 1:
+                    addBook();
+                    break;
+                case 2:
+                    showAllBooks();
+                    break;
+                case 3:
+                    searchBook();
+                    break;
+                case 4:
+                    borrowBook();
+                    break;
+                case 5:
+                    returnBook();
+                    break;
+                case 6:
+                    deleteBook();
+                    break;
+                case 0:
+                    run = false;
+                    System.out.println(">> 프로그램을 종료합니다. 안녕히 가세요!");
+                    break;
+                default:
+                    System.out.println(">> 0~6 사이의 숫자를 입력해주세요.\n");
+            }
+        }
+
+        sc.close();
+    }
+
+    // 메뉴 출력
+    public static void printMenu() {
+        System.out.println("------------ 메뉴 ------------");
+        System.out.println(" 1. 도서 등록");
+        System.out.println(" 2. 전체 도서 목록 보기");
+        System.out.println(" 3. 도서 검색 (제목)");
+        System.out.println(" 4. 도서 대여");
+        System.out.println(" 5. 도서 반납");
+        System.out.println(" 6. 도서 삭제");
+        System.out.println(" 0. 프로그램 종료");
+        System.out.println("------------------------------");
+        System.out.print("메뉴 번호 선택 >> ");
+    }
+
+    // 도서 등록
+    public static void addBook() {
+        System.out.print("책 제목: ");
+        String title = sc.nextLine();
+        System.out.print("저자: ");
+        String author = sc.nextLine();
+        System.out.print("출판년도: ");
+        int year = 0;
+        try {
+            year = Integer.parseInt(sc.nextLine());
+        } catch (Exception e) {
+            System.out.println(">> 출판년도는 숫자로 입력해주세요. 등록을 취소합니다.\n");
+            return;
+        }
+
+        Book newBook = new Book(title, author, year);
+        bookList.add(newBook);
+        System.out.println(">> [" + title + "] 책이 등록되었습니다!\n");
+    }
+
+    // 전체 도서 목록 보기
+    public static void showAllBooks() {
+        if (bookList.size() == 0) {
+            System.out.println(">> 등록된 책이 없습니다.\n");
+            return;
+        }
+
+        System.out.println("---------- 전체 도서 목록 ----------");
+        for (int i = 0; i < bookList.size(); i++) {
+            System.out.print((i + 1) + ". ");
+            bookList.get(i).printInfo();
+        }
+        System.out.println("총 " + bookList.size() + "권의 책이 있습니다.\n");
+    }
+
+    // 도서 검색 (제목으로 검색)
+    public static void searchBook() {
+        System.out.print("검색할 책 제목(일부) 입력: ");
+        String keyword = sc.nextLine();
+
+        int count = 0;
+        for (int i = 0; i < bookList.size(); i++) {
+            Book b = bookList.get(i);
+            if (b.getTitle().contains(keyword)) {
+                System.out.print((i + 1) + ". ");
+                b.printInfo();
+                count++;
+            }
+        }
+
+        if (count == 0) {
+            System.out.println(">> 검색 결과가 없습니다.\n");
+        } else {
+            System.out.println(">> 총 " + count + "권 검색됨.\n");
+        }
+    }
+
+    // 도서 대여
+    public static void borrowBook() {
+        System.out.print("대여할 책 제목 입력: ");
+        String title = sc.nextLine();
+
+        for (int i = 0; i < bookList.size(); i++) {
+            Book b = bookList.get(i);
+            if (b.getTitle().equals(title)) {
+                if (b.getIsBorrowed()) {
+                    System.out.println(">> 이미 대여중인 책입니다.\n");
+                } else {
+                    b.setIsBorrowed(true);
+                    System.out.println(">> [" + title + "] 대여 완료!\n");
+                }
+                return;
+            }
+        }
+        System.out.println(">> 해당 책을 찾을 수 없습니다.\n");
+    }
+
+    // 도서 반납
+    public static void returnBook() {
+        System.out.print("반납할 책 제목 입력: ");
+        String title = sc.nextLine();
+
+        for (int i = 0; i < bookList.size(); i++) {
+            Book b = bookList.get(i);
+            if (b.getTitle().equals(title)) {
+                if (!b.getIsBorrowed()) {
+                    System.out.println(">> 이 책은 대여중이 아닙니다.\n");
+                } else {
+                    b.setIsBorrowed(false);
+                    System.out.println(">> [" + title + "] 반납 완료!\n");
+                }
+                return;
+            }
+        }
+        System.out.println(">> 해당 책을 찾을 수 없습니다.\n");
+    }
+
+    // 도서 삭제
+    public static void deleteBook() {
+        System.out.print("삭제할 책 제목 입력: ");
+        String title = sc.nextLine();
+
+        for (int i = 0; i < bookList.size(); i++) {
+            if (bookList.get(i).getTitle().equals(title)) {
+                bookList.remove(i);
+                System.out.println(">> [" + title + "] 삭제 완료!\n");
+                return;
+            }
+        }
+        System.out.println(">> 해당 책을 찾을 수 없습니다.\n");
+    }
+}
